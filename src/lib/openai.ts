@@ -39,6 +39,18 @@ export async function generateSummary(request: SummaryRequest): Promise<SummaryR
       outputCostRate = 0.0006;
     }
     
+    // Calculate proportional summary length based on input text
+    const calculateMaxTokens = (textLength: number): number => {
+      const wordCount = text.trim().split(/\s+/).length;
+      // Proportional: 1 word of summary per 10 words of input, max 2000 words
+      const proportionalWords = Math.min(Math.ceil(wordCount / 10), 2000);
+      // Convert to tokens (roughly 1.3 tokens per word)
+      return Math.ceil(proportionalWords * 1.3);
+    };
+    
+    // Use provided maxTokens or calculate proportional length
+    const summaryMaxTokens = maxTokens || calculateMaxTokens(text.length);
+    
     const completion = await openai.chat.completions.create({
       model: model,
       messages: [
@@ -52,7 +64,7 @@ export async function generateSummary(request: SummaryRequest): Promise<SummaryR
         }
       ],
       temperature: temperature,
-      max_tokens: maxTokens || 500,
+      max_tokens: summaryMaxTokens,
     });
 
     const summary = completion.choices[0]?.message?.content || 'No summary generated';

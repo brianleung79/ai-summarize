@@ -16,12 +16,14 @@ const getOpenAIClient = () => {
   return openaiClient;
 };
 
-export const openai = getOpenAIClient();
+// Export a function that gets the client when called, not when imported
+export const getOpenAI = () => getOpenAIClient();
 
 export async function generateSummary(request: SummaryRequest): Promise<SummaryResponse> {
   const { text, temperature, maxTokens } = request;
   
   try {
+    const openai = getOpenAI();
     const completion = await openai.chat.completions.create({
       model: process.env.OPENAI_MODEL || 'gpt-3.5-turbo',
       messages: [

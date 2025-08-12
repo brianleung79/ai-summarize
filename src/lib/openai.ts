@@ -1,13 +1,22 @@
 import OpenAI from 'openai';
 import { SummaryRequest, SummaryResponse } from '@/types';
 
-if (!process.env.OPENAI_API_KEY) {
-  throw new Error('Missing OPENAI_API_KEY environment variable');
-}
+// Lazy initialization - only create client when needed
+let openaiClient: OpenAI | null = null;
 
-export const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const getOpenAIClient = () => {
+  if (!openaiClient) {
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error('Missing OPENAI_API_KEY environment variable');
+    }
+    openaiClient = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+  return openaiClient;
+};
+
+export const openai = getOpenAIClient();
 
 export async function generateSummary(request: SummaryRequest): Promise<SummaryResponse> {
   const { text, temperature, maxTokens } = request;

@@ -1,4 +1,4 @@
-# AI Text Summarizer
+# AI Text Summarizer 🚀
 
 A sophisticated, futuristic AI-powered text summarization tool built with Next.js, OpenAI, and Tailwind CSS. Features intelligent cost management, proportional summary lengths, and a beautiful glassmorphism design.
 

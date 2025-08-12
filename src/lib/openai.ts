@@ -24,8 +24,23 @@ export async function generateSummary(request: SummaryRequest): Promise<SummaryR
   
   try {
     const openai = getOpenAI();
+    
+    // Automatically select model based on text length
+    // Rough estimate: 1 token ≈ 4 characters
+    const estimatedTokens = Math.ceil(text.length / 4);
+    let model = 'gpt-3.5-turbo';
+    let inputCostRate = 0.0015;
+    let outputCostRate = 0.002;
+    
+    // Use GPT-4o-mini for longer text (better context length and cost)
+    if (estimatedTokens > 8000) { // If estimated > 8K tokens, use GPT-4o-mini
+      model = 'gpt-4o-mini';
+      inputCostRate = 0.00015;
+      outputCostRate = 0.0006;
+    }
+    
     const completion = await openai.chat.completions.create({
-      model: process.env.OPENAI_MODEL || 'gpt-3.5-turbo',
+      model: model,
       messages: [
         {
           role: 'system',
@@ -47,9 +62,9 @@ export async function generateSummary(request: SummaryRequest): Promise<SummaryR
       throw new Error('No usage information received from OpenAI API');
     }
     
-    // Calculate cost based on tokens used
-    const inputCost = (usage.prompt_tokens / 1000) * 0.0015; // gpt-3.5-turbo input cost
-    const outputCost = (usage.completion_tokens / 1000) * 0.002; // gpt-3.5-turbo output cost
+    // Calculate cost based on tokens used (using dynamic rates based on selected model)
+    const inputCost = (usage.prompt_tokens / 1000) * inputCostRate;
+    const outputCost = (usage.completion_tokens / 1000) * outputCostRate;
     const totalCost = inputCost + outputCost;
 
     return {

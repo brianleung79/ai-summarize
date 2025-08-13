@@ -22,11 +22,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Calculate proportional summary length (max 400 words)
+    // Calculate proportional summary length based on input text
     const calculateMaxTokens = (textLength: number): number => {
       const wordCount = text.trim().split(/\s+/).length;
-      // Proportional: 1 word of summary per 10 words of input, max 400 words
-      const proportionalWords = Math.min(Math.ceil(wordCount / 10), 400);
+      // Proportional: 1 word of summary per 10 words of input, max 2000 words
+      const proportionalWords = Math.min(Math.ceil(wordCount / 10), 2000);
       // Convert to tokens (roughly 1.3 tokens per word)
       return Math.ceil(proportionalWords * 1.3);
     };
